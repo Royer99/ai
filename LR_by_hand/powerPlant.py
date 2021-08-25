@@ -69,3 +69,11 @@ plt.ylabel('Net hourly electrical energy (EP) MW')
 plt.legend()
 plt.title('Linear regression plot')
 fig5.savefig(f"{images_dir}/lin.png")
+
+#interactive query
+while(1):
+  print("please provide a temperature to predict the Net hourly electrical energy")
+  print("ranges from 1.81°C and 37.11°C")
+  temp=float(input())
+  res=a0+a1*temp
+  print(res)
