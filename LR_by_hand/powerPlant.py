@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from scipy.special import logsumexp
 
 columns=["T","AP","RH","V","EP"]
 df = pd.read_csv('Folds5x2_pp.csv',names = columns,skiprows=1)
@@ -28,15 +29,16 @@ fig4.savefig(f"{images_dir}/V.png")
 #split the data using the 80-20 rule
 numberOfInstances=9568
 fd_cement=df_x[["T"]]
-x_train=fd_cement[:round(80*numberOfInstances/100)+10].to_numpy()
-y_train=df_y[:round(80*numberOfInstances/100)+10].to_numpy()
-x_test=fd_cement[round(80*numberOfInstances/100)-10:].to_numpy()
-y_test=df_y[round(80*numberOfInstances/100)-10:].to_numpy()
+x_train=fd_cement[:round(80*numberOfInstances/100)].to_numpy()
+y_train=df_y[:round(80*numberOfInstances/100)].to_numpy()
+x_test=fd_cement[round(80*numberOfInstances/100):].to_numpy()
+y_test=df_y[round(80*numberOfInstances/100):].to_numpy()
 #print(y_train.shape[0])
 #print(x_test.shape[0])
 #print(y_test.shape[0])
 
 n=x_train.shape[0]
+n2=x_test.shape[0]
 sum1=0
 sum2=0
 sum3=0
@@ -55,11 +57,11 @@ xhat=sum3/n
 yhat=sum4/n
 #print(xhat)
 #print(yhat)
-print(((n*sum2)-(sum3*sum3)))
+#print(((n*sum2)-(sum3*sum3)))
 a1=((n*sum1)-(sum3*sum4))/((n*sum2)-(sum3*sum3))
 a0=yhat-(a1*xhat)
-print("a1",a1)
-print("a0",a0)
+print("coefficient a1",a1)
+print("Intercept a0",a0)
 y=a0+a1*x_train
 #plt.scatter(df[["T"]],df[["EP"]],marker=1)
 fig5=plt.figure(5)
@@ -69,6 +71,24 @@ plt.ylabel('Net hourly electrical energy (EP) MW')
 plt.legend()
 plt.title('Linear regression plot')
 fig5.savefig(f"{images_dir}/lin.png")
+#accuracy 
+meany=sum4/n
+#print(meany)
+deltay=np.zeros_like([n])
+for i in range(n):
+  deltay=np.append(deltay,y_train[i]-meany)
+#print(deltay)
+deltay2=list(map(lambda x: x * x, deltay))
+deltay2sum=sum(deltay2)
+#print(deltay2sum)
+predictevals=np.zeros_like([n2])
+predictevals=map(lambda x: a0+a1*x,x_test)
+#print(list(predictevals))
+predictdelta=map(lambda x: x-meany,predictevals)
+predictdelta2=list(map(lambda x: x * x, predictdelta))
+predictdelta2sum=sum(predictdelta2)
+
+print("R2 is equal to: ",predictdelta2sum/deltay2sum)
 
 #interactive query
 while(1):
